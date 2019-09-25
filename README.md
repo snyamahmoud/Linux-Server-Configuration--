@@ -1,56 +1,146 @@
-# Linux-Server-Configuration--
+# Linux-Server-Configuration
+Udacity P3, Full Stack - Configure a Server with Linux
 
-## About
-A web application that provides a list of items within a variety of categories and integrate third party user registration and authentication. Authenticated users should have the ability to post, edit, and delete their own items. This project uses Python 3.4 .
+###i. 
+The IP address: 52.33.224.137 
 
-## Python Libraries
-This project uses following Libraries:
-- Random, String, Http2lib, Json (Comes along with python)
-- SQLAlchemy 
-   
-- Flask
-  
-- OAuth2
- 
-- Requests
-  
-## Project Content
-- app.py - This is the main file and contain main program.
-- database_setup.py - This file contain the structure of the database to be implemented.
-- db_items.py - This file contain the code to populate the database with dummy data.
-- client_secrets.json - This file contain info about the google api.
-- catalog.db - Database created after running database_setup.py and db_items.py
-- templates/ - This folder contain all the templates used to render the website.
-- static/ - This folder contain static files like CSS and JS files
+###ii. 
+SSH port: 2200
 
-## Working
-* Download the project zip file to you computer and unzip the file or clone this repository to your desktop.
-* Navigate to the project directory.
-* Open terminal and run following command
-   
-* Now the application is running locally.
-* Visit [here](http://localhost:5000/) to view the application.
-* If you want to run the application with your own credentials than follow these steps :
-    ### _Get an API key_
-    
-    1. Login to your google account.
-    2. Go to the [Google API Console](https://console.developers.google.com/flows/enableapi?apiid=places_backend&reusekey=true).
-    3. Create or select a project.
-    4. Click Continue to enable the API.
-    5. On the Credentials page, get an API key (and set the API key restrictions).
-        -> For More Info About the API Click [Here](https://developers.google.com/identity/protocols/OAuth2).
-    6. Download your client_secrets.json file.
-    
-    ### Running the Application
-    - Replace client_secrests.json file with your file.
-    - Replace data-clientid parameter value in login.html with your own client ID.
-    - Now open Terminal and run following commands
-       
+###iii. 
+http://52.33.224.137 ot http://ec2-52-33-224-137.us-west-2.compute.amazonaws.com
 
-## JSON Endpoints
-The following are open to the public:
-* Level JSON: /level/JSON - Displays all levels
+###iv. 
+##SW Intsalled:
+-apt-get apache2
 
-* Level Courses JSON: /level/<level_name>/JSON/ - Displays courses for a specific level
+-apt-get install libapache2-mod-wsgi
 
-* Course JSON: /level/<level_name>/<course_name>/JSON/ - Displays a specific course.
+-apt-get install postgresql
+
+-apt-get install git
+
+-apt-get install libapache2-mod-wsgi python-dev
+
+-apt-get install python-pip
+
+-apt-get install python-psycopg2
+
+-apt-get install libpq-dev python-dev
+
+-pip install virtualenv
+
+-pip install requests
+
+-pip install sqlalchemy
+
+-pip install Flask
+
+-pip install httplib2
+
+-pip install oauth2client
+
+-pip install werkzeug==0.8.3 //theese last three fixed a problem with the google sign-in
+
+-pip install flask==0.9
+
+-pip install Flask-Login==0.1.3
+
+## Main commands and changes
+###Create a new user named grader: 
+`add user grader`
+###Give the grader the permission to sudo: 
+`visudo` add "grader ALL=(ALL:ALL) ALL" after the root
+And create the ssh to allow the remote login of grader 
+/home/grader/.ssh/authorized_keys `chmod 700 .ssh` `chmod 644 .ssh/authorized_keys`
+###Update all currently installed packages:
+`apt-get update` and `apt-get upgrade`
+###Change the SSH port from 22 to 2200:
+`nano /etc/ssh/sshd_config`
+set port 2200 and PermitRootLogin no
+###Configure the Uncomplicated Firewall:
+`ufw default deny incoming`
+
+`ufw default allow outgoing`
+
+`ufw allow 2200/tcp`
+
+`ufw allow 80/tcp`
+
+`ufw allow 123/udp`
+
+`ufw enable`
+###Configure the local timezone to UTC:
+It was alredy set to UTC, typing `date` -> Wed Dec 30 12:55:43 UTC 2015
+###Install and configure Apache to serve a Python mod_wsgi application:
+Install Apache and mod_wsgi
+`nano /etc/apache2/sites-available/catalog.conf` and paste:
+```
+<VirtualHost *:80>
+      ServerName 52.33.224.137
+      ServerAdmin admin@52.33.224.137
+      ServerAlias ec2-52-33-224-137.us-west-2.compute.amazonaws.com
+      WSGIScriptAlias / /var/www/catalog/catalog.wsgi
+      <Directory /var/www/catalog/catalog/>
+          Order allow,deny
+          Allow from all
+      </Directory>
+      Alias /static /var/www/catalog/catalog/static
+      <Directory /var/www/catalog/catalog/static/>
+          Order allow,deny
+          Allow from all
+      </Directory>
+      ErrorLog ${APACHE_LOG_DIR}/error.log
+      LogLevel warn
+      CustomLog ${APACHE_LOG_DIR}/access.log combined
+  </VirtualHost>
+```
+
+`a2ensite catalog`
+in /var/www/catalog `nano catalog.wsgi` and paste:
+```
+#!/usr/bin/python
+import sys
+import logging
+logging.basicConfig(stream=sys.stderr)
+sys.path.insert(0,"/var/www/catalog/")
+from catalog import app as application
+application.secret_key = 'asdeggio'
+```
+
+`service apache2 restart`
+###Install and configure PostgreSQL:
+`adduser catalog`  `su - postgre` `psql` and create the database with the password dbpass and connect to it
+
+###Install git, clone and setup your Catalog App project:
+Install and `git config --global user.name "Gus42"` and `git config --global user.email "gus815@gmail.com"`
+`git clone https://github.com/Gus42/Linux-Server-Configuration.git` and move to directory /var/www/catalog/catalog/
+in /var/www/catalog `nano .htaccess` and paste "RedirectMatch 404 /\.git"
+
+For the oauth of google: in the dev console, per this app, in credits, in js origins insert http://52.33.224.137 and http://ec2-52-33-224-137.us-west-2.compute.amazonaws.com end for the redirect uri insert http://ec2-52-33-224-137.us-west-2.compute.amazonaws.com/oauth2callback
+
+For the oauth of facebook: insert for the app url: http://52.33.224.137
+then:
+`service apache2 restart`
+
+###v.  
+
+- http://askubuntu.com/
+
+- https://www.google.co.uk
+
+- https://discussions.udacity.com/c/nd004-p5-linux-based-server-configuration
+
+- http://stackoverflow.com/
+
+- https://pypi.python.org/
+
+- http://flask-sqlalchemy.pocoo.org/2.1/
+
+- http://flask.pocoo.org/docs/0.10/
+
+- https://www.digitalocean.com/community/tutorials/how-to-configure-ssh-key-based-authentication-on-a-linux-server
+
+- https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-12-04
+
+- https://www.digitalocean.com/community/tutorials/how-to-setup-a-firewall-with-ufw-on-an-ubuntu-and-debian-cloud-server
